@@ -1,6 +1,5 @@
 (function() {
-  var CELL_SIZE, Jelly, JellyCell, Stage, level, levelPicker, levels, moveToCell, stage,
-    __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var CELL_SIZE, Jelly, JellyCell, Stage, level, levelPicker, levels, moveToCell, stage;
 
   levels = [["xxxxxxxxxxxxxx", "x            x", "x            x", "x      r     x", "x      xx    x", "x  g     r b x", "xxbxxxg xxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x            x", "x     g   g  x", "x   r r   r  x", "xxxxx x x xxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x   bg  x g  x", "xxx xxxrxxx  x", "x      b     x", "xxx xxxrxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x       r    x", "x       b    x", "x       x    x", "x b r        x", "x b r      b x", "xxx x      xxx", "xxxxx xxxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "xrg  gg      x", "xxx xxxx xx  x", "xrg          x", "xxxxx  xx   xx", "xxxxxx xx  xxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "xxxxxxx      x", "xxxxxxx g    x", "x       xx   x", "x r   b      x", "x x xxx x g  x", "x         x bx", "x       r xxxx", "x   xxxxxxxxxx", "xxxxxxxxxxxxxx"]];
 
@@ -22,7 +21,9 @@
       this.busy = false;
       maybeSwallowEvent = function(e) {
         e.preventDefault();
-        if (_this.busy) return e.stopPropagation();
+        if (_this.busy) {
+          return e.stopPropagation();
+        }
       };
       _ref = ['contextmenu', 'click', 'touchstart', 'touchmove'];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -37,16 +38,16 @@
       table = document.createElement('table');
       this.dom.appendChild(table);
       this.cells = (function() {
-        var _ref, _results;
+        var _i, _ref, _results;
         _results = [];
-        for (y = 0, _ref = map.length; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
+        for (y = _i = 0, _ref = map.length; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
           row = map[y].split(/(?:)/);
           tr = document.createElement('tr');
           table.appendChild(tr);
           _results.push((function() {
-            var _ref2, _results2;
-            _results2 = [];
-            for (x = 0, _ref2 = row.length; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
+            var _j, _ref1, _results1;
+            _results1 = [];
+            for (x = _j = 0, _ref1 = row.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
               color = null;
               cell = null;
               switch (row[x]) {
@@ -75,9 +76,9 @@
                 this.jellies.push(jelly);
                 cell = jelly;
               }
-              _results2.push(cell);
+              _results1.push(cell);
             }
-            return _results2;
+            return _results1;
           }).call(this));
         }
         return _results;
@@ -86,41 +87,43 @@
     };
 
     Stage.prototype.addBorders = function() {
-      var attr, border, cell, dx, dy, edges, other, x, y, _i, _len, _ref, _ref2, _ref3, _ref4, _ref5;
-      for (y = 0, _ref = this.cells.length; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
-        for (x = 0, _ref2 = this.cells[0].length; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
+      var attr, border, cell, dx, dy, edges, other, x, y, _i, _j, _k, _len, _ref, _ref1, _ref2, _ref3, _ref4;
+      for (y = _i = 0, _ref = this.cells.length; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
+        for (x = _j = 0, _ref1 = this.cells[0].length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
           cell = this.cells[y][x];
-          if (!(cell && cell.tagName === 'TD')) continue;
+          if (!(cell && cell.tagName === 'TD')) {
+            continue;
+          }
           border = 'solid 1px #777';
           edges = [['borderBottom', 0, 1], ['borderTop', 0, -1], ['borderLeft', -1, 0], ['borderRight', 1, 0]];
-          for (_i = 0, _len = edges.length; _i < _len; _i++) {
-            _ref3 = edges[_i], attr = _ref3[0], dx = _ref3[1], dy = _ref3[2];
-            if (!((0 <= (_ref4 = y + dy) && _ref4 < this.cells.length))) continue;
-            if (!((0 <= (_ref5 = x + dx) && _ref5 < this.cells[0].length))) {
+          for (_k = 0, _len = edges.length; _k < _len; _k++) {
+            _ref2 = edges[_k], attr = _ref2[0], dx = _ref2[1], dy = _ref2[2];
+            if (!((0 <= (_ref3 = y + dy) && _ref3 < this.cells.length))) {
+              continue;
+            }
+            if (!((0 <= (_ref4 = x + dx) && _ref4 < this.cells[0].length))) {
               continue;
             }
             other = this.cells[y + dy][x + dx];
-            if (!(other && other.tagName === 'TD')) cell.style[attr] = border;
+            if (!(other && other.tagName === 'TD')) {
+              cell.style[attr] = border;
+            }
           }
         }
       }
     };
 
-    Stage.prototype.waitForAnimation = function(count, cb) {
+    Stage.prototype.waitForAnimation = function(cb) {
       var end, name, names, _i, _len,
         _this = this;
       names = ['transitionend', 'webkitTransitionEnd'];
-      this.pending = count;
-      end = function(e) {
+      end = function() {
         var name, _i, _len;
-        _this.pending = _this.pending - 1;
-        if (_this.pending === 0) {
-          for (_i = 0, _len = names.length; _i < _len; _i++) {
-            name = names[_i];
-            _this.dom.removeEventListener(name, end);
-          }
-          return cb();
+        for (_i = 0, _len = names.length; _i < _len; _i++) {
+          name = names[_i];
+          _this.dom.removeEventListener(name, end);
         }
+        return cb();
       };
       for (_i = 0, _len = names.length; _i < _len; _i++) {
         name = names[_i];
@@ -129,17 +132,13 @@
     };
 
     Stage.prototype.trySlide = function(jelly, dir) {
-      var bunch, j, _i, _len, _ref,
-        _this = this;
-      bunch = [jelly];
-      if (this.checkFilled(bunch, dir, 0)) return;
-      this.busy = true;
-      _ref = bunch.reverse();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        j = _ref[_i];
-        this.move(j, j.x + dir, j.y);
+      var _this = this;
+      if (this.checkFilled(jelly, dir, 0)) {
+        return;
       }
-      return this.waitForAnimation(bunch.length, function() {
+      this.busy = true;
+      this.move(jelly, jelly.x + dir, jelly.y);
+      return this.waitForAnimation(function() {
         return _this.checkFall(function() {
           _this.checkForMerges();
           return _this.busy = false;
@@ -148,42 +147,28 @@
     };
 
     Stage.prototype.move = function(jelly, targetX, targetY) {
-      var x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3, _ref4;
+      var x, y, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
       _ref = jelly.cellCoords();
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref2 = _ref[_i], x = _ref2[0], y = _ref2[1];
+        _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
         this.cells[y][x] = null;
       }
       jelly.updatePosition(targetX, targetY);
-      _ref3 = jelly.cellCoords();
-      for (_j = 0, _len2 = _ref3.length; _j < _len2; _j++) {
-        _ref4 = _ref3[_j], x = _ref4[0], y = _ref4[1];
+      _ref2 = jelly.cellCoords();
+      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+        _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1];
         this.cells[y][x] = jelly;
       }
     };
 
-    Stage.prototype.checkFilled = function(bunch, dx, dy) {
-      var done, jelly, next, x, y, _i, _j, _len, _len2, _ref, _ref2;
-      done = false;
-      while (!done) {
-        done = true;
-        for (_i = 0, _len = bunch.length; _i < _len; _i++) {
-          jelly = bunch[_i];
-          _ref = jelly.cellCoords();
-          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
-            _ref2 = _ref[_j], x = _ref2[0], y = _ref2[1];
-            next = this.cells[y + dy][x + dx];
-            if (next && !(__indexOf.call(bunch, next) >= 0)) {
-              if (next instanceof Jelly) {
-                bunch.push(next);
-                done = false;
-                break;
-              } else {
-                return next;
-              }
-            }
-          }
-          if (!done) break;
+    Stage.prototype.checkFilled = function(jelly, dx, dy) {
+      var next, x, y, _i, _len, _ref, _ref1;
+      _ref = jelly.cellCoords();
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
+        next = this.cells[y + dy][x + dx];
+        if (next && next !== jelly) {
+          return next;
         }
       }
       return false;
@@ -198,7 +183,7 @@
         _ref = this.jellies;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           jelly = _ref[_i];
-          if (!this.checkFilled([jelly], 0, 1)) {
+          if (!this.checkFilled(jelly, 0, 1)) {
             this.move(jelly, jelly.x, jelly.y + 1);
             didOneMove = true;
             moved = true;
@@ -206,24 +191,26 @@
         }
       }
       if (moved) {
-        this.waitForAnimation(1, cb);
+        this.waitForAnimation(cb);
       } else {
         cb();
       }
     };
 
     Stage.prototype.checkForMerges = function() {
-      var jelly, merged, x, y, _i, _len, _ref, _ref2;
+      var jelly, merged, x, y, _i, _len, _ref, _ref1;
       merged = false;
       while (jelly = this.doOneMerge()) {
         merged = true;
         _ref = jelly.cellCoords();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          _ref2 = _ref[_i], x = _ref2[0], y = _ref2[1];
+          _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
           this.cells[y][x] = jelly;
         }
       }
-      if (merged) this.checkForCompletion();
+      if (merged) {
+        this.checkForCompletion();
+      }
     };
 
     Stage.prototype.checkForCompletion = function() {
@@ -240,20 +227,26 @@
     };
 
     Stage.prototype.doOneMerge = function() {
-      var dx, dy, jelly, other, x, y, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5;
+      var dx, dy, jelly, other, x, y, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _ref4;
       _ref = this.jellies;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         jelly = _ref[_i];
-        _ref2 = jelly.cellCoords();
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1];
-          _ref4 = [[1, 0], [0, 1]];
-          for (_k = 0, _len3 = _ref4.length; _k < _len3; _k++) {
-            _ref5 = _ref4[_k], dx = _ref5[0], dy = _ref5[1];
+        _ref1 = jelly.cellCoords();
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          _ref2 = _ref1[_j], x = _ref2[0], y = _ref2[1];
+          _ref3 = [[1, 0], [0, 1]];
+          for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+            _ref4 = _ref3[_k], dx = _ref4[0], dy = _ref4[1];
             other = this.cells[y + dy][x + dx];
-            if (!(other && other instanceof Jelly)) continue;
-            if (other === jelly) continue;
-            if (jelly.color !== other.color) continue;
+            if (!(other && other instanceof Jelly)) {
+              continue;
+            }
+            if (other === jelly) {
+              continue;
+            }
+            if (jelly.color !== other.color) {
+              continue;
+            }
             jelly.merge(other);
             this.jellies = this.jellies.filter(function(j) {
               return j !== other;
@@ -334,7 +327,7 @@
     };
 
     Jelly.prototype.merge = function(other) {
-      var cell, dx, dy, othercell, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
+      var cell, dx, dy, othercell, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       dx = other.x - this.x;
       dy = other.y - this.y;
       _ref = other.cells;
@@ -348,13 +341,15 @@
       }
       other.cells = null;
       other.dom.parentNode.removeChild(other.dom);
-      _ref2 = this.cells;
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        cell = _ref2[_j];
-        _ref3 = this.cells;
-        for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-          othercell = _ref3[_k];
-          if (othercell === cell) continue;
+      _ref1 = this.cells;
+      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+        cell = _ref1[_j];
+        _ref2 = this.cells;
+        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
+          othercell = _ref2[_k];
+          if (othercell === cell) {
+            continue;
+          }
           if (othercell.x === cell.x + 1 && othercell.y === cell.y) {
             cell.dom.style.borderRight = 'none';
           } else if (othercell.x === cell.x - 1 && othercell.y === cell.y) {
@@ -392,3 +387,5 @@
   });
 
 }).call(this);
+
+// Generated by CoffeeScript 1.5.0-pre

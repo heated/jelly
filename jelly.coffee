@@ -131,31 +131,22 @@ class Stage
           cell.style[attr] = border unless other and other.tagName == 'TD'
     return
 
-  # When pushing, we may be firing multiple 'left' transitions at once;
-  # we need the count parameter to swallow them all, as they may be followed
-  # immediately by 'top' transitions (falling).
-  waitForAnimation: (count, cb) ->
+  waitForAnimation: (cb) ->
     names = ['transitionend', 'webkitTransitionEnd']
-    @pending = count
-    end = (e) =>
-      @pending = @pending - 1
-      if @pending == 0
-        @dom.removeEventListener(name, end) for name in names
-        cb()
+    end = () =>
+      @dom.removeEventListener(name, end) for name in names
+      cb()
     @dom.addEventListener(name, end) for name in names
     return
 
   trySlide: (jelly, dir) ->
-    bunch = [jelly]
-    return if @checkFilled(bunch, dir, 0)
+    return if @checkFilled(jelly, dir, 0)
     @busy = true
-    # Start with jellies added last, so as not to overwrite @cells.
-    for j in bunch.reverse()
-      @move(j, j.x + dir, j.y)
-    @waitForAnimation(bunch.length, () =>
+    @move(jelly, jelly.x + dir, jelly.y)
+    @waitForAnimation () =>
       @checkFall =>
         @checkForMerges()
-        @busy = false)
+        @busy = false
 
   move: (jelly, targetX, targetY) ->
     @cells[y][x] = null for [x, y] in jelly.cellCoords()
@@ -163,20 +154,10 @@ class Stage
     @cells[y][x] = jelly for [x, y] in jelly.cellCoords()
     return
 
-  checkFilled: (bunch, dx, dy) ->
-    done = false
-    while not done
-      done = true
-      for jelly in bunch
-        for [x, y] in jelly.cellCoords()
-          next = @cells[y + dy][x + dx]
-          if next and not(next in bunch)
-            if next instanceof Jelly
-              bunch.push(next)
-              done = false
-              break
-            else return next
-        break if not done 
+  checkFilled: (jelly, dx, dy) ->
+    for [x, y] in jelly.cellCoords()
+      next = @cells[y + dy][x + dx]
+      return next if next and next != jelly
     return false
 
   checkFall: (cb) ->
@@ -185,13 +166,12 @@ class Stage
     while didOneMove
       didOneMove = false
       for jelly in @jellies
-        if not @checkFilled([jelly], 0, 1)
+        if not @checkFilled(jelly, 0, 1)
           @move(jelly, jelly.x, jelly.y + 1)
           didOneMove = true
           moved = true
     if moved
-      # Nothing follows this, so it's alright to wait for just one event.
-      @waitForAnimation(1,cb)
+      @waitForAnimation cb
     else
       cb()
     return
