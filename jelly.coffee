@@ -135,29 +135,42 @@ class Stage
     names = ['transitionend', 'webkitTransitionEnd']
     end = () =>
       @dom.removeEventListener(name, end) for name in names
-      cb()
+      # Wait one call stack before continuing.  This is necessary if there
+      # are multiple pending end transition events (multiple jellies moving);
+      # we want to wait for them all here and not accidentally catch them
+      # in a subsequent waitForAnimation.
+      setTimeout(cb, 0)
     @dom.addEventListener(name, end) for name in names
     return
 
   trySlide: (jelly, dir) ->
-    return if @checkFilled(jelly, dir, 0)
+    jellies = [jelly]
+    return if @checkFilled(jellies, dir, 0)
     @busy = true
-    @move(jelly, jelly.x + dir, jelly.y)
+    @move(jellies, dir, 0)
     @waitForAnimation () =>
       @checkFall =>
         @checkForMerges()
         @busy = false
 
-  move: (jelly, targetX, targetY) ->
-    @cells[y][x] = null for [x, y] in jelly.cellCoords()
-    jelly.updatePosition(targetX, targetY)
-    @cells[y][x] = jelly for [x, y] in jelly.cellCoords()
+  move: (jellies, dx, dy) ->
+    @cells[y][x] = null for [x, y] in jelly.cellCoords() for jelly in jellies
+    jelly.updatePosition(jelly.x+dx, jelly.y+dy) for jelly in jellies
+    @cells[y][x] = jelly for [x, y] in jelly.cellCoords() for jelly in jellies
     return
 
-  checkFilled: (jelly, dx, dy) ->
-    for [x, y] in jelly.cellCoords()
-      next = @cells[y + dy][x + dx]
-      return next if next and next != jelly
+  checkFilled: (jellies, dx, dy) ->
+    done = false
+    while not done
+      done = true
+      for jelly in jellies
+        for [x, y] in jelly.cellCoords()
+          next = @cells[y + dy][x + dx]
+          if next and next not in jellies
+            return true unless next instanceof Jelly
+            jellies.push next
+            done = false
+            break
     return false
 
   checkFall: (cb) ->
@@ -166,8 +179,8 @@ class Stage
     while didOneMove
       didOneMove = false
       for jelly in @jellies
-        if not @checkFilled(jelly, 0, 1)
-          @move(jelly, jelly.x, jelly.y + 1)
+        if not @checkFilled([jelly], 0, 1)
+          @move([jelly], 0, 1)
           didOneMove = true
           moved = true
     if moved
@@ -271,15 +284,20 @@ class Jelly
           cell.dom.style.borderTop = 'none'
     return
 
-level = parseInt(location.search.substr(1), 10) or 0
-stage = new Stage(document.getElementById('map'), levels[level])
+level = parseInt(location.search.substr(1), 10) or 1
+stage = new Stage(document.getElementById('map'), levels[level-1])
 window.stage = stage
 
 levelPicker = document.getElementById('level')
+for i in [1..levels.length]
+  option = document.createElement('option')
+  option.value = i
+  option.innerText = "Level #{i}"
+  levelPicker.appendChild(option)
 levelPicker.value = level
 levelPicker.addEventListener 'change', () ->
   location.search = '?' + levelPicker.value
 
 document.getElementById('reset').addEventListener 'click', ->
   stage.dom.innerHTML = ''
-  stage = new Stage(stage.dom, levels[level])
+  stage = new Stage(stage.dom, levels[level-1])

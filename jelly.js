@@ -1,5 +1,6 @@
 (function() {
-  var CELL_SIZE, Jelly, JellyCell, Stage, level, levelPicker, levels, moveToCell, stage;
+  var CELL_SIZE, Jelly, JellyCell, Stage, i, level, levelPicker, levels, moveToCell, option, stage, _i, _ref,
+    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   levels = [["xxxxxxxxxxxxxx", "x            x", "x            x", "x      r     x", "x      xx    x", "x  g     r b x", "xxbxxxg xxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x            x", "x     g   g  x", "x   r r   r  x", "xxxxx x x xxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x   bg  x g  x", "xxx xxxrxxx  x", "x      b     x", "xxx xxxrxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x       r    x", "x       b    x", "x       x    x", "x b r        x", "x b r      b x", "xxx x      xxx", "xxxxx xxxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "xrg  gg      x", "xxx xxxx xx  x", "xrg          x", "xxxxx  xx   xx", "xxxxxx xx  xxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "xxxxxxx      x", "xxxxxxx g    x", "x       xx   x", "x r   b      x", "x x xxx x g  x", "x         x bx", "x       r xxxx", "x   xxxxxxxxxx", "xxxxxxxxxxxxxx"]];
 
@@ -123,7 +124,7 @@
           name = names[_i];
           _this.dom.removeEventListener(name, end);
         }
-        return cb();
+        return setTimeout(cb, 0);
       };
       for (_i = 0, _len = names.length; _i < _len; _i++) {
         name = names[_i];
@@ -132,12 +133,14 @@
     };
 
     Stage.prototype.trySlide = function(jelly, dir) {
-      var _this = this;
-      if (this.checkFilled(jelly, dir, 0)) {
+      var jellies,
+        _this = this;
+      jellies = [jelly];
+      if (this.checkFilled(jellies, dir, 0)) {
         return;
       }
       this.busy = true;
-      this.move(jelly, jelly.x + dir, jelly.y);
+      this.move(jellies, dir, 0);
       return this.waitForAnimation(function() {
         return _this.checkFall(function() {
           _this.checkForMerges();
@@ -146,29 +149,50 @@
       });
     };
 
-    Stage.prototype.move = function(jelly, targetX, targetY) {
-      var x, y, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
-      _ref = jelly.cellCoords();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
-        this.cells[y][x] = null;
+    Stage.prototype.move = function(jellies, dx, dy) {
+      var jelly, x, y, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3;
+      for (_i = 0, _len = jellies.length; _i < _len; _i++) {
+        jelly = jellies[_i];
+        _ref = jelly.cellCoords();
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+          _ref1 = _ref[_j], x = _ref1[0], y = _ref1[1];
+          this.cells[y][x] = null;
+        }
       }
-      jelly.updatePosition(targetX, targetY);
-      _ref2 = jelly.cellCoords();
-      for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-        _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1];
-        this.cells[y][x] = jelly;
+      for (_k = 0, _len2 = jellies.length; _k < _len2; _k++) {
+        jelly = jellies[_k];
+        jelly.updatePosition(jelly.x + dx, jelly.y + dy);
+      }
+      for (_l = 0, _len3 = jellies.length; _l < _len3; _l++) {
+        jelly = jellies[_l];
+        _ref2 = jelly.cellCoords();
+        for (_m = 0, _len4 = _ref2.length; _m < _len4; _m++) {
+          _ref3 = _ref2[_m], x = _ref3[0], y = _ref3[1];
+          this.cells[y][x] = jelly;
+        }
       }
     };
 
-    Stage.prototype.checkFilled = function(jelly, dx, dy) {
-      var next, x, y, _i, _len, _ref, _ref1;
-      _ref = jelly.cellCoords();
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
-        next = this.cells[y + dy][x + dx];
-        if (next && next !== jelly) {
-          return next;
+    Stage.prototype.checkFilled = function(jellies, dx, dy) {
+      var done, jelly, next, x, y, _i, _j, _len, _len1, _ref, _ref1;
+      done = false;
+      while (!done) {
+        done = true;
+        for (_i = 0, _len = jellies.length; _i < _len; _i++) {
+          jelly = jellies[_i];
+          _ref = jelly.cellCoords();
+          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            _ref1 = _ref[_j], x = _ref1[0], y = _ref1[1];
+            next = this.cells[y + dy][x + dx];
+            if (next && __indexOf.call(jellies, next) < 0) {
+              if (!(next instanceof Jelly)) {
+                return true;
+              }
+              jellies.push(next);
+              done = false;
+              break;
+            }
+          }
         }
       }
       return false;
@@ -183,8 +207,8 @@
         _ref = this.jellies;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           jelly = _ref[_i];
-          if (!this.checkFilled(jelly, 0, 1)) {
-            this.move(jelly, jelly.x, jelly.y + 1);
+          if (!this.checkFilled([jelly], 0, 1)) {
+            this.move([jelly], 0, 1);
             didOneMove = true;
             moved = true;
           }
@@ -367,13 +391,20 @@
 
   })();
 
-  level = parseInt(location.search.substr(1), 10) || 0;
+  level = parseInt(location.search.substr(1), 10) || 1;
 
-  stage = new Stage(document.getElementById('map'), levels[level]);
+  stage = new Stage(document.getElementById('map'), levels[level - 1]);
 
   window.stage = stage;
 
   levelPicker = document.getElementById('level');
+
+  for (i = _i = 1, _ref = levels.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+    option = document.createElement('option');
+    option.value = i;
+    option.innerText = "Level " + i;
+    levelPicker.appendChild(option);
+  }
 
   levelPicker.value = level;
 
@@ -383,7 +414,7 @@
 
   document.getElementById('reset').addEventListener('click', function() {
     stage.dom.innerHTML = '';
-    return stage = new Stage(stage.dom, levels[level]);
+    return stage = new Stage(stage.dom, levels[level - 1]);
   });
 
 }).call(this);
