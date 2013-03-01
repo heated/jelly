@@ -104,10 +104,11 @@ class Stage
           td.className = 'transparent'
           tr.appendChild(td)
         if color
-          jelly = new Jelly(this, x, y, color)
+          jellycell = new JellyCell(color)
+          jelly = new Jelly(this, jellycell, x, y)
           @dom.appendChild(jelly.dom)
           @jellies.push jelly
-          cell = jelly
+          cell = jellycell
         cell
     @addBorders()
     return
@@ -154,9 +155,9 @@ class Stage
         @busy = false
 
   move: (jellies, dx, dy) ->
-    @cells[y][x] = null for [x, y] in jelly.cellCoords() for jelly in jellies
+    @cells[y][x] = null for [x, y, cell] in jelly.cellCoords() for jelly in jellies
     jelly.updatePosition(jelly.x+dx, jelly.y+dy) for jelly in jellies
-    @cells[y][x] = jelly for [x, y] in jelly.cellCoords() for jelly in jellies
+    @cells[y][x] = cell for [x, y, cell] in jelly.cellCoords() for jelly in jellies
     return
 
   checkFilled: (jellies, dx, dy) ->
@@ -164,13 +165,14 @@ class Stage
     while not done
       done = true
       for jelly in jellies
-        for [x, y] in jelly.cellCoords()
+        for [x, y, cell] in jelly.cellCoords()
           next = @cells[y + dy][x + dx]
-          if next and next not in jellies
-            return true unless next instanceof Jelly
-            jellies.push next
-            done = false
-            break
+          continue unless next           # empty space
+          return true unless next.jelly  # wall
+          continue if next.jelly in jellies
+          jellies.push next.jelly
+          done = false
+          break
     return false
 
   checkFall: (cb) ->
@@ -191,50 +193,48 @@ class Stage
 
   checkForMerges: ->
     merged = false
-    while jelly = @doOneMerge()
+    while @doOneMerge()
       merged = true
-      for [x, y] in jelly.cellCoords()
-        @cells[y][x] = jelly
     @checkForCompletion() if merged
     return
 
   checkForCompletion: ->
     colors = {}
-    colors[j.color] = 1 for j in @jellies
+    colors[cell.color] = 1 for [x,y,cell] in jelly.cellCoords() for jelly in @jellies
     if Object.keys(colors).length == @jellies.length
       alert("Congratulations! Level completed.")
     return
 
   doOneMerge: ->
     for jelly in @jellies
-      for [x, y] in jelly.cellCoords()
+      for [x, y, cell] in jelly.cellCoords()
         # Only look right and down; left and up are handled by that side
         # itself looking right and down.
         for [dx, dy] in [[1, 0], [0, 1]]
           other = @cells[y + dy][x + dx]
-          continue unless other and other instanceof Jelly
-          continue unless other != jelly
-          continue unless jelly.color == other.color
-          jelly.merge other
-          @jellies = @jellies.filter (j) -> j != other
-          return jelly
-    return null
+          continue unless other and other instanceof JellyCell
+          continue unless other.jelly != jelly
+          continue unless other.color == cell.color
+          @jellies = @jellies.filter (j) -> j != other.jelly
+          jelly.merge other.jelly
+          return true
+    return false
 
 class JellyCell
-  constructor: (@jelly, @x, @y, color) ->
+  constructor: (@color) ->
     @dom = document.createElement('div')
     @dom.className = 'cell jelly ' + color
-
+    @x = 0
+    @y = 0
 
 class Jelly
-  constructor: (stage, @x, @y, @color) ->
+  constructor: (stage, cell, @x, @y) ->
     @dom = document.createElement('div')
     @updatePosition(@x, @y)
     @dom.className = 'cell jellybox'
-
-    cell = new JellyCell(this, 0, 0, @color)
-    @dom.appendChild(cell.dom)
+    cell.jelly = this
     @cells = [cell]
+    @dom.appendChild(cell.dom)
 
     @dom.addEventListener 'contextmenu', (e) =>
       stage.trySlide(this, 1)
@@ -250,7 +250,7 @@ class Jelly
         stage.trySlide(this, dx)
 
   cellCoords: ->
-    [@x + cell.x, @y + cell.y] for cell in @cells
+    [@x + cell.x, @y + cell.y, cell] for cell in @cells
 
   updatePosition: (@x, @y) ->
     moveToCell @dom, @x, @y
@@ -263,6 +263,7 @@ class Jelly
       @cells.push cell
       cell.x += dx
       cell.y += dy
+      cell.jelly = this
       moveToCell cell.dom, cell.x, cell.y
       @dom.appendChild(cell.dom)
 

@@ -1,6 +1,6 @@
 (function() {
-  var CELL_SIZE, Jelly, JellyCell, Stage, i, level, levelPicker, levels, moveToCell, option, stage, _i, _ref,
-    __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+  var CELL_SIZE, Jelly, JellyCell, Stage, i, level, levelPicker, levels, moveToCell, option, stage, _ref,
+    __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   levels = [["xxxxxxxxxxxxxx", "x            x", "x            x", "x      r     x", "x      xx    x", "x  g     r b x", "xxbxxxg xxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x            x", "x     g   g  x", "x   r r   r  x", "xxxxx x x xxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x   bg  x g  x", "xxx xxxrxxx  x", "x      b     x", "xxx xxxrxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x       r    x", "x       b    x", "x       x    x", "x b r        x", "x b r      b x", "xxx x      xxx", "xxxxx xxxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "xrg  gg      x", "xxx xxxx xx  x", "xrg          x", "xxxxx  xx   xx", "xxxxxx xx  xxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "xxxxxxx      x", "xxxxxxx g    x", "x       xx   x", "x r   b      x", "x x xxx x g  x", "x         x bx", "x       r xxxx", "x   xxxxxxxxxx", "xxxxxxxxxxxxxx"]];
 
@@ -22,9 +22,7 @@
       this.busy = false;
       maybeSwallowEvent = function(e) {
         e.preventDefault();
-        if (_this.busy) {
-          return e.stopPropagation();
-        }
+        if (_this.busy) return e.stopPropagation();
       };
       _ref = ['contextmenu', 'click', 'touchstart', 'touchmove'];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -35,20 +33,20 @@
     }
 
     Stage.prototype.loadMap = function(map) {
-      var cell, color, jelly, row, table, td, tr, x, y;
+      var cell, color, jelly, jellycell, row, table, td, tr, x, y;
       table = document.createElement('table');
       this.dom.appendChild(table);
       this.cells = (function() {
-        var _i, _ref, _results;
+        var _ref, _results;
         _results = [];
-        for (y = _i = 0, _ref = map.length; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
+        for (y = 0, _ref = map.length; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
           row = map[y].split(/(?:)/);
           tr = document.createElement('tr');
           table.appendChild(tr);
           _results.push((function() {
-            var _j, _ref1, _results1;
-            _results1 = [];
-            for (x = _j = 0, _ref1 = row.length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
+            var _ref2, _results2;
+            _results2 = [];
+            for (x = 0, _ref2 = row.length; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
               color = null;
               cell = null;
               switch (row[x]) {
@@ -72,14 +70,15 @@
                 tr.appendChild(td);
               }
               if (color) {
-                jelly = new Jelly(this, x, y, color);
+                jellycell = new JellyCell(color);
+                jelly = new Jelly(this, jellycell, x, y);
                 this.dom.appendChild(jelly.dom);
                 this.jellies.push(jelly);
-                cell = jelly;
+                cell = jellycell;
               }
-              _results1.push(cell);
+              _results2.push(cell);
             }
-            return _results1;
+            return _results2;
           }).call(this));
         }
         return _results;
@@ -88,27 +87,21 @@
     };
 
     Stage.prototype.addBorders = function() {
-      var attr, border, cell, dx, dy, edges, other, x, y, _i, _j, _k, _len, _ref, _ref1, _ref2, _ref3, _ref4;
-      for (y = _i = 0, _ref = this.cells.length; 0 <= _ref ? _i < _ref : _i > _ref; y = 0 <= _ref ? ++_i : --_i) {
-        for (x = _j = 0, _ref1 = this.cells[0].length; 0 <= _ref1 ? _j < _ref1 : _j > _ref1; x = 0 <= _ref1 ? ++_j : --_j) {
+      var attr, border, cell, dx, dy, edges, other, x, y, _i, _len, _ref, _ref2, _ref3, _ref4, _ref5;
+      for (y = 0, _ref = this.cells.length; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
+        for (x = 0, _ref2 = this.cells[0].length; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
           cell = this.cells[y][x];
-          if (!(cell && cell.tagName === 'TD')) {
-            continue;
-          }
+          if (!(cell && cell.tagName === 'TD')) continue;
           border = 'solid 1px #777';
           edges = [['borderBottom', 0, 1], ['borderTop', 0, -1], ['borderLeft', -1, 0], ['borderRight', 1, 0]];
-          for (_k = 0, _len = edges.length; _k < _len; _k++) {
-            _ref2 = edges[_k], attr = _ref2[0], dx = _ref2[1], dy = _ref2[2];
-            if (!((0 <= (_ref3 = y + dy) && _ref3 < this.cells.length))) {
-              continue;
-            }
-            if (!((0 <= (_ref4 = x + dx) && _ref4 < this.cells[0].length))) {
+          for (_i = 0, _len = edges.length; _i < _len; _i++) {
+            _ref3 = edges[_i], attr = _ref3[0], dx = _ref3[1], dy = _ref3[2];
+            if (!((0 <= (_ref4 = y + dy) && _ref4 < this.cells.length))) continue;
+            if (!((0 <= (_ref5 = x + dx) && _ref5 < this.cells[0].length))) {
               continue;
             }
             other = this.cells[y + dy][x + dx];
-            if (!(other && other.tagName === 'TD')) {
-              cell.style[attr] = border;
-            }
+            if (!(other && other.tagName === 'TD')) cell.style[attr] = border;
           }
         }
       }
@@ -136,9 +129,7 @@
       var jellies,
         _this = this;
       jellies = [jelly];
-      if (this.checkFilled(jellies, dir, 0)) {
-        return;
-      }
+      if (this.checkFilled(jellies, dir, 0)) return;
       this.busy = true;
       this.move(jellies, dir, 0);
       return this.waitForAnimation(function() {
@@ -150,48 +141,46 @@
     };
 
     Stage.prototype.move = function(jellies, dx, dy) {
-      var jelly, x, y, _i, _j, _k, _l, _len, _len1, _len2, _len3, _len4, _m, _ref, _ref1, _ref2, _ref3;
+      var cell, jelly, x, y, _i, _j, _k, _l, _len, _len2, _len3, _len4, _len5, _m, _ref, _ref2, _ref3, _ref4;
       for (_i = 0, _len = jellies.length; _i < _len; _i++) {
         jelly = jellies[_i];
         _ref = jelly.cellCoords();
-        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-          _ref1 = _ref[_j], x = _ref1[0], y = _ref1[1];
+        for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+          _ref2 = _ref[_j], x = _ref2[0], y = _ref2[1], cell = _ref2[2];
           this.cells[y][x] = null;
         }
       }
-      for (_k = 0, _len2 = jellies.length; _k < _len2; _k++) {
+      for (_k = 0, _len3 = jellies.length; _k < _len3; _k++) {
         jelly = jellies[_k];
         jelly.updatePosition(jelly.x + dx, jelly.y + dy);
       }
-      for (_l = 0, _len3 = jellies.length; _l < _len3; _l++) {
+      for (_l = 0, _len4 = jellies.length; _l < _len4; _l++) {
         jelly = jellies[_l];
-        _ref2 = jelly.cellCoords();
-        for (_m = 0, _len4 = _ref2.length; _m < _len4; _m++) {
-          _ref3 = _ref2[_m], x = _ref3[0], y = _ref3[1];
-          this.cells[y][x] = jelly;
+        _ref3 = jelly.cellCoords();
+        for (_m = 0, _len5 = _ref3.length; _m < _len5; _m++) {
+          _ref4 = _ref3[_m], x = _ref4[0], y = _ref4[1], cell = _ref4[2];
+          this.cells[y][x] = cell;
         }
       }
     };
 
     Stage.prototype.checkFilled = function(jellies, dx, dy) {
-      var done, jelly, next, x, y, _i, _j, _len, _len1, _ref, _ref1;
+      var cell, done, jelly, next, x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3;
       done = false;
       while (!done) {
         done = true;
         for (_i = 0, _len = jellies.length; _i < _len; _i++) {
           jelly = jellies[_i];
           _ref = jelly.cellCoords();
-          for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
-            _ref1 = _ref[_j], x = _ref1[0], y = _ref1[1];
+          for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+            _ref2 = _ref[_j], x = _ref2[0], y = _ref2[1], cell = _ref2[2];
             next = this.cells[y + dy][x + dx];
-            if (next && __indexOf.call(jellies, next) < 0) {
-              if (!(next instanceof Jelly)) {
-                return true;
-              }
-              jellies.push(next);
-              done = false;
-              break;
-            }
+            if (!next) continue;
+            if (!next.jelly) return true;
+            if (_ref3 = next.jelly, __indexOf.call(jellies, _ref3) >= 0) continue;
+            jellies.push(next.jelly);
+            done = false;
+            break;
           }
         }
       }
@@ -222,28 +211,25 @@
     };
 
     Stage.prototype.checkForMerges = function() {
-      var jelly, merged, x, y, _i, _len, _ref, _ref1;
+      var merged;
       merged = false;
-      while (jelly = this.doOneMerge()) {
+      while (this.doOneMerge()) {
         merged = true;
-        _ref = jelly.cellCoords();
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          _ref1 = _ref[_i], x = _ref1[0], y = _ref1[1];
-          this.cells[y][x] = jelly;
-        }
       }
-      if (merged) {
-        this.checkForCompletion();
-      }
+      if (merged) this.checkForCompletion();
     };
 
     Stage.prototype.checkForCompletion = function() {
-      var colors, j, _i, _len, _ref;
+      var cell, colors, jelly, x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3;
       colors = {};
       _ref = this.jellies;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        j = _ref[_i];
-        colors[j.color] = 1;
+        jelly = _ref[_i];
+        _ref2 = jelly.cellCoords();
+        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+          _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1], cell = _ref3[2];
+          colors[cell.color] = 1;
+        }
       }
       if (Object.keys(colors).length === this.jellies.length) {
         alert("Congratulations! Level completed.");
@@ -251,35 +237,29 @@
     };
 
     Stage.prototype.doOneMerge = function() {
-      var dx, dy, jelly, other, x, y, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2, _ref3, _ref4;
+      var cell, dx, dy, jelly, other, x, y, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5;
       _ref = this.jellies;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         jelly = _ref[_i];
-        _ref1 = jelly.cellCoords();
-        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-          _ref2 = _ref1[_j], x = _ref2[0], y = _ref2[1];
-          _ref3 = [[1, 0], [0, 1]];
-          for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-            _ref4 = _ref3[_k], dx = _ref4[0], dy = _ref4[1];
+        _ref2 = jelly.cellCoords();
+        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+          _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1], cell = _ref3[2];
+          _ref4 = [[1, 0], [0, 1]];
+          for (_k = 0, _len3 = _ref4.length; _k < _len3; _k++) {
+            _ref5 = _ref4[_k], dx = _ref5[0], dy = _ref5[1];
             other = this.cells[y + dy][x + dx];
-            if (!(other && other instanceof Jelly)) {
-              continue;
-            }
-            if (other === jelly) {
-              continue;
-            }
-            if (jelly.color !== other.color) {
-              continue;
-            }
-            jelly.merge(other);
+            if (!(other && other instanceof JellyCell)) continue;
+            if (other.jelly === jelly) continue;
+            if (other.color !== cell.color) continue;
             this.jellies = this.jellies.filter(function(j) {
-              return j !== other;
+              return j !== other.jelly;
             });
-            return jelly;
+            jelly.merge(other.jelly);
+            return true;
           }
         }
       }
-      return null;
+      return false;
     };
 
     return Stage;
@@ -288,12 +268,12 @@
 
   JellyCell = (function() {
 
-    function JellyCell(jelly, x, y, color) {
-      this.jelly = jelly;
-      this.x = x;
-      this.y = y;
+    function JellyCell(color) {
+      this.color = color;
       this.dom = document.createElement('div');
       this.dom.className = 'cell jelly ' + color;
+      this.x = 0;
+      this.y = 0;
     }
 
     return JellyCell;
@@ -302,18 +282,16 @@
 
   Jelly = (function() {
 
-    function Jelly(stage, x, y, color) {
-      var cell,
-        _this = this;
+    function Jelly(stage, cell, x, y) {
+      var _this = this;
       this.x = x;
       this.y = y;
-      this.color = color;
       this.dom = document.createElement('div');
       this.updatePosition(this.x, this.y);
       this.dom.className = 'cell jellybox';
-      cell = new JellyCell(this, 0, 0, this.color);
-      this.dom.appendChild(cell.dom);
+      cell.jelly = this;
       this.cells = [cell];
+      this.dom.appendChild(cell.dom);
       this.dom.addEventListener('contextmenu', function(e) {
         return stage.trySlide(_this, 1);
       });
@@ -339,7 +317,7 @@
       _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         cell = _ref[_i];
-        _results.push([this.x + cell.x, this.y + cell.y]);
+        _results.push([this.x + cell.x, this.y + cell.y, cell]);
       }
       return _results;
     };
@@ -351,7 +329,7 @@
     };
 
     Jelly.prototype.merge = function(other) {
-      var cell, dx, dy, othercell, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
+      var cell, dx, dy, othercell, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
       dx = other.x - this.x;
       dy = other.y - this.y;
       _ref = other.cells;
@@ -360,20 +338,19 @@
         this.cells.push(cell);
         cell.x += dx;
         cell.y += dy;
+        cell.jelly = this;
         moveToCell(cell.dom, cell.x, cell.y);
         this.dom.appendChild(cell.dom);
       }
       other.cells = null;
       other.dom.parentNode.removeChild(other.dom);
-      _ref1 = this.cells;
-      for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-        cell = _ref1[_j];
-        _ref2 = this.cells;
-        for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-          othercell = _ref2[_k];
-          if (othercell === cell) {
-            continue;
-          }
+      _ref2 = this.cells;
+      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
+        cell = _ref2[_j];
+        _ref3 = this.cells;
+        for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
+          othercell = _ref3[_k];
+          if (othercell === cell) continue;
           if (othercell.x === cell.x + 1 && othercell.y === cell.y) {
             cell.dom.style.borderRight = 'none';
           } else if (othercell.x === cell.x - 1 && othercell.y === cell.y) {
@@ -399,7 +376,7 @@
 
   levelPicker = document.getElementById('level');
 
-  for (i = _i = 1, _ref = levels.length; 1 <= _ref ? _i <= _ref : _i >= _ref; i = 1 <= _ref ? ++_i : --_i) {
+  for (i = 1, _ref = levels.length; 1 <= _ref ? i <= _ref : i >= _ref; 1 <= _ref ? i++ : i--) {
     option = document.createElement('option');
     option.value = i;
     option.innerText = "Level " + i;
@@ -418,5 +395,3 @@
   });
 
 }).call(this);
-
-// Generated by CoffeeScript 1.5.0-pre
