@@ -89,26 +89,23 @@ class Stage
       table.appendChild(tr)
       for x in [0...row.length]
         color = null
+        classname = 'transparent'
         cell = null
+        td = document.createElement('td')
         switch row[x]
           when 'x'
-            cell = document.createElement('td')
-            cell.className = 'cell wall'
-            tr.appendChild(cell)
+            classname = 'cell wall'
+            cell = new Wall(td)
           when 'r' then color = 'red'
           when 'g' then color = 'green'
           when 'b' then color = 'blue'
-
-        unless cell
-          td = document.createElement('td')
-          td.className = 'transparent'
-          tr.appendChild(td)
+        td.className = classname
+        tr.appendChild(td)
         if color
-          jellycell = new JellyCell(color)
-          jelly = new Jelly(this, jellycell, x, y)
+          cell = new JellyCell(color)
+          jelly = new Jelly(this, cell, x, y)
           @dom.appendChild(jelly.dom)
           @jellies.push jelly
-          cell = jellycell
         cell
     @addBorders()
     return
@@ -165,6 +162,7 @@ class Stage
     while not done
       done = true
       for jelly in jellies
+        return true if jelly.immovable
         for [x, y, cell] in jelly.cellCoords()
           next = @cells[y + dy][x + dx]
           continue unless next           # empty space
@@ -210,15 +208,18 @@ class Stage
       for [x, y, cell] in jelly.cellCoords()
         # Only look right and down; left and up are handled by that side
         # itself looking right and down.
-        for [dx, dy] in [[1, 0], [0, 1]]
+        for [dx, dy, dir] in [[1, 0, 'right'], [0, 1, 'down']]
           other = @cells[y + dy][x + dx]
           continue unless other and other instanceof JellyCell
           continue unless other.jelly != jelly
           continue unless other.color == cell.color
           @jellies = @jellies.filter (j) -> j != other.jelly
-          jelly.merge other.jelly
+          cell.mergeWith other, dir
           return true
     return false
+
+class Wall
+  constructor: (@dom) ->
 
 class JellyCell
   constructor: (@color) ->
@@ -226,6 +227,25 @@ class JellyCell
     @dom.className = 'cell jelly ' + color
     @x = 0
     @y = 0
+
+  mergeWith: (other, dir) ->
+    borders = {
+      'left': ['borderLeft', 'borderRight'],
+      'right': ['borderRight', 'borderLeft'],
+      'up': ['borderTop', 'borderBottom'],
+      'down': ['borderBottom', 'borderTop']
+    }
+    # Remove internal borders, whether merging with other jelly or wall.
+    @dom.style[borders[dir][0]] = 'none'
+    other.dom.style[borders[dir][1]] = 'none'
+
+    # If merging with wall, jelly becomes immovable.
+    @jelly.immovable = true if other instanceof Wall
+
+    # If merging with jelly, unify the jellies.
+    if other instanceof JellyCell
+      @jelly.merge(other.jelly)
+
 
 class Jelly
   constructor: (stage, cell, @x, @y) ->
@@ -248,6 +268,7 @@ class Jelly
       if Math.abs(dx) > 10
         dx = Math.max(Math.min(dx, 1), -1)
         stage.trySlide(this, dx)
+    @immovable = false
 
   cellCoords: ->
     [@x + cell.x, @y + cell.y, cell] for cell in @cells
@@ -267,22 +288,10 @@ class Jelly
       moveToCell cell.dom, cell.x, cell.y
       @dom.appendChild(cell.dom)
 
+    @immovable = true if other.immovable
     # Delete references from/to other.
     other.cells = null
     other.dom.parentNode.removeChild(other.dom)
-
-    # Remove internal borders.
-    for cell in @cells
-      for othercell in @cells
-        continue if othercell == cell
-        if othercell.x == cell.x + 1 and othercell.y == cell.y
-          cell.dom.style.borderRight = 'none'
-        else if othercell.x == cell.x - 1 and othercell.y == cell.y
-          cell.dom.style.borderLeft = 'none'
-        else if othercell.x == cell.x and othercell.y == cell.y + 1
-          cell.dom.style.borderBottom = 'none'
-        else if othercell.x == cell.x and othercell.y == cell.y - 1
-          cell.dom.style.borderTop = 'none'
     return
 
 level = parseInt(location.search.substr(1), 10) or 1

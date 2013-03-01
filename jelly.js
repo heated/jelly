@@ -1,5 +1,5 @@
 (function() {
-  var CELL_SIZE, Jelly, JellyCell, Stage, i, level, levelPicker, levels, moveToCell, option, stage, _ref,
+  var CELL_SIZE, Jelly, JellyCell, Stage, Wall, i, level, levelPicker, levels, moveToCell, option, stage, _ref,
     __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
   levels = [["xxxxxxxxxxxxxx", "x            x", "x            x", "x      r     x", "x      xx    x", "x  g     r b x", "xxbxxxg xxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x            x", "x     g   g  x", "x   r r   r  x", "xxxxx x x xxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x   bg  x g  x", "xxx xxxrxxx  x", "x      b     x", "xxx xxxrxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x       r    x", "x       b    x", "x       x    x", "x b r        x", "x b r      b x", "xxx x      xxx", "xxxxx xxxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "xrg  gg      x", "xxx xxxx xx  x", "xrg          x", "xxxxx  xx   xx", "xxxxxx xx  xxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "xxxxxxx      x", "xxxxxxx g    x", "x       xx   x", "x r   b      x", "x x xxx x g  x", "x         x bx", "x       r xxxx", "x   xxxxxxxxxx", "xxxxxxxxxxxxxx"]];
@@ -33,7 +33,7 @@
     }
 
     Stage.prototype.loadMap = function(map) {
-      var cell, color, jelly, jellycell, row, table, td, tr, x, y;
+      var cell, classname, color, jelly, row, table, td, tr, x, y;
       table = document.createElement('table');
       this.dom.appendChild(table);
       this.cells = (function() {
@@ -48,12 +48,13 @@
             _results2 = [];
             for (x = 0, _ref2 = row.length; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
               color = null;
+              classname = 'transparent';
               cell = null;
+              td = document.createElement('td');
               switch (row[x]) {
                 case 'x':
-                  cell = document.createElement('td');
-                  cell.className = 'cell wall';
-                  tr.appendChild(cell);
+                  classname = 'cell wall';
+                  cell = new Wall(td);
                   break;
                 case 'r':
                   color = 'red';
@@ -64,17 +65,13 @@
                 case 'b':
                   color = 'blue';
               }
-              if (!cell) {
-                td = document.createElement('td');
-                td.className = 'transparent';
-                tr.appendChild(td);
-              }
+              td.className = classname;
+              tr.appendChild(td);
               if (color) {
-                jellycell = new JellyCell(color);
-                jelly = new Jelly(this, jellycell, x, y);
+                cell = new JellyCell(color);
+                jelly = new Jelly(this, cell, x, y);
                 this.dom.appendChild(jelly.dom);
                 this.jellies.push(jelly);
-                cell = jellycell;
               }
               _results2.push(cell);
             }
@@ -171,6 +168,7 @@
         done = true;
         for (_i = 0, _len = jellies.length; _i < _len; _i++) {
           jelly = jellies[_i];
+          if (jelly.immovable) return true;
           _ref = jelly.cellCoords();
           for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
             _ref2 = _ref[_j], x = _ref2[0], y = _ref2[1], cell = _ref2[2];
@@ -237,16 +235,16 @@
     };
 
     Stage.prototype.doOneMerge = function() {
-      var cell, dx, dy, jelly, other, x, y, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5;
+      var cell, dir, dx, dy, jelly, other, x, y, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3, _ref4, _ref5;
       _ref = this.jellies;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         jelly = _ref[_i];
         _ref2 = jelly.cellCoords();
         for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
           _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1], cell = _ref3[2];
-          _ref4 = [[1, 0], [0, 1]];
+          _ref4 = [[1, 0, 'right'], [0, 1, 'down']];
           for (_k = 0, _len3 = _ref4.length; _k < _len3; _k++) {
-            _ref5 = _ref4[_k], dx = _ref5[0], dy = _ref5[1];
+            _ref5 = _ref4[_k], dx = _ref5[0], dy = _ref5[1], dir = _ref5[2];
             other = this.cells[y + dy][x + dx];
             if (!(other && other instanceof JellyCell)) continue;
             if (other.jelly === jelly) continue;
@@ -254,7 +252,7 @@
             this.jellies = this.jellies.filter(function(j) {
               return j !== other.jelly;
             });
-            jelly.merge(other.jelly);
+            cell.mergeWith(other, dir);
             return true;
           }
         }
@@ -263,6 +261,16 @@
     };
 
     return Stage;
+
+  })();
+
+  Wall = (function() {
+
+    function Wall(dom) {
+      this.dom = dom;
+    }
+
+    return Wall;
 
   })();
 
@@ -275,6 +283,20 @@
       this.x = 0;
       this.y = 0;
     }
+
+    JellyCell.prototype.mergeWith = function(other, dir) {
+      var borders;
+      borders = {
+        'left': ['borderLeft', 'borderRight'],
+        'right': ['borderRight', 'borderLeft'],
+        'up': ['borderTop', 'borderBottom'],
+        'down': ['borderBottom', 'borderTop']
+      };
+      this.dom.style[borders[dir][0]] = 'none';
+      other.dom.style[borders[dir][1]] = 'none';
+      if (other instanceof Wall) this.jelly.immovable = true;
+      if (other instanceof JellyCell) return this.jelly.merge(other.jelly);
+    };
 
     return JellyCell;
 
@@ -309,6 +331,7 @@
           return stage.trySlide(_this, dx);
         }
       });
+      this.immovable = false;
     }
 
     Jelly.prototype.cellCoords = function() {
@@ -329,7 +352,7 @@
     };
 
     Jelly.prototype.merge = function(other) {
-      var cell, dx, dy, othercell, _i, _j, _k, _len, _len2, _len3, _ref, _ref2, _ref3;
+      var cell, dx, dy, _i, _len, _ref;
       dx = other.x - this.x;
       dy = other.y - this.y;
       _ref = other.cells;
@@ -342,26 +365,9 @@
         moveToCell(cell.dom, cell.x, cell.y);
         this.dom.appendChild(cell.dom);
       }
+      if (other.immovable) this.immovable = true;
       other.cells = null;
       other.dom.parentNode.removeChild(other.dom);
-      _ref2 = this.cells;
-      for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-        cell = _ref2[_j];
-        _ref3 = this.cells;
-        for (_k = 0, _len3 = _ref3.length; _k < _len3; _k++) {
-          othercell = _ref3[_k];
-          if (othercell === cell) continue;
-          if (othercell.x === cell.x + 1 && othercell.y === cell.y) {
-            cell.dom.style.borderRight = 'none';
-          } else if (othercell.x === cell.x - 1 && othercell.y === cell.y) {
-            cell.dom.style.borderLeft = 'none';
-          } else if (othercell.x === cell.x && othercell.y === cell.y + 1) {
-            cell.dom.style.borderBottom = 'none';
-          } else if (othercell.x === cell.x && othercell.y === cell.y - 1) {
-            cell.dom.style.borderTop = 'none';
-          }
-        }
-      }
     };
 
     return Jelly;
