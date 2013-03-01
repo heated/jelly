@@ -114,7 +114,7 @@ class Stage
     for y in [0...@cells.length]
       for x in [0...@cells[0].length]
         cell = @cells[y][x]
-        continue unless cell and cell.tagName == 'TD'
+        continue unless cell instanceof Wall
         border = 'solid 1px #777'
         edges = [
           ['borderBottom',  0,  1],
@@ -126,7 +126,7 @@ class Stage
           continue unless 0 <= (y+dy) < @cells.length
           continue unless 0 <= (x+dx) < @cells[0].length
           other = @cells[y+dy][x+dx]
-          cell.style[attr] = border unless other and other.tagName == 'TD'
+          cell.dom.style[attr] = border unless other instanceof Wall
     return
 
   waitForAnimation: (cb) ->

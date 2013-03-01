@@ -88,7 +88,7 @@
       for (y = 0, _ref = this.cells.length; 0 <= _ref ? y < _ref : y > _ref; 0 <= _ref ? y++ : y--) {
         for (x = 0, _ref2 = this.cells[0].length; 0 <= _ref2 ? x < _ref2 : x > _ref2; 0 <= _ref2 ? x++ : x--) {
           cell = this.cells[y][x];
-          if (!(cell && cell.tagName === 'TD')) continue;
+          if (!(cell instanceof Wall)) continue;
           border = 'solid 1px #777';
           edges = [['borderBottom', 0, 1], ['borderTop', 0, -1], ['borderLeft', -1, 0], ['borderRight', 1, 0]];
           for (_i = 0, _len = edges.length; _i < _len; _i++) {
@@ -98,7 +98,7 @@
               continue;
             }
             other = this.cells[y + dy][x + dx];
-            if (!(other && other.tagName === 'TD')) cell.style[attr] = border;
+            if (!(other instanceof Wall)) cell.dom.style[attr] = border;
           }
         }
       }
