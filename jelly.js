@@ -71,7 +71,19 @@
           dir: 'down'
         }
       ]
-    ], ["xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx", "xxxxx gr xxxxx", "xxxxx rb xxxxx", "xxxxx gr xxxxx", "xxxxx bg xxxxx", "xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx"]
+    ], ["xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx", "xxxxx gr xxxxx", "xxxxx rb xxxxx", "xxxxx gr xxxxx", "xxxxx bg xxxxx", "xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx"], [
+      ["xxxxxxxxxxxxxx", "xxxxxxxxx   rx", "xxxxxxxxx   gx", "xxxxxxxxx   gx", "x1122       gx", "x1122       gx", "x0033      xxx", "x0033      xxx", "xxr x gxxx xxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 2,
+          y: 8,
+          dir: 'down'
+        }, {
+          x: 6,
+          y: 8,
+          dir: 'down'
+        }
+      ]
+    ]
   ];
 
   CELL_SIZE = 48;
@@ -376,10 +388,10 @@
               this.jellies = this.jellies.filter(function(j) {
                 return j !== other.jelly;
               });
+              this.num_monochromatic_blocks -= 1;
             }
             cell.mergeWith(other, dir);
             cell['merged' + dir] = true;
-            this.num_monochromatic_blocks -= 1;
             return true;
           }
         }

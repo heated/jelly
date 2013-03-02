@@ -165,6 +165,22 @@ levels = [
     "xxxxxxxxxxxxxx",
     "xxxxxxxxxxxxxx", ],
 
+  [ [ "xxxxxxxxxxxxxx",
+      "xxxxxxxxx   rx",
+      "xxxxxxxxx   gx",
+      "xxxxxxxxx   gx",
+      "x1122       gx",
+      "x1122       gx",
+      "x0033      xxx",
+      "x0033      xxx",
+      "xxr x gxxx xxx",
+      "xxxxxxxxxxxxxx", ],
+    [
+      { x:2, y:8, dir:'down' },
+      { x:6, y:8, dir:'down' },
+    ],
+  ],
+
   ]
 
 CELL_SIZE = 48
@@ -364,9 +380,9 @@ class Stage
           continue unless other.color == cell.color
           if jelly != other.jelly
             @jellies = @jellies.filter (j) -> j != other.jelly
+            @num_monochromatic_blocks -= 1
           cell.mergeWith other, dir
           cell['merged' + dir] = true
-          @num_monochromatic_blocks -= 1
           return true
     return false
 
