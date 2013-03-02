@@ -319,17 +319,18 @@
     };
 
     Stage.prototype.checkFall = function(cb) {
-      var didOneMove, jelly, moved, _i, _len, _ref;
+      var jelly, jellyset, moved, try_again, _i, _len, _ref;
       moved = false;
-      didOneMove = true;
-      while (didOneMove) {
-        didOneMove = false;
+      try_again = true;
+      while (try_again) {
+        try_again = false;
         _ref = this.jellies;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           jelly = _ref[_i];
-          if (!this.checkFilled([jelly], 0, 1)) {
-            this.move([jelly], 0, 1);
-            didOneMove = true;
+          jellyset = [jelly];
+          if (!this.checkFilled(jellyset, 0, 1)) {
+            this.move(jellyset, 0, 1);
+            try_again = true;
             moved = true;
           }
         }

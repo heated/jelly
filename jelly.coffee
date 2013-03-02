@@ -325,13 +325,14 @@ class Stage
 
   checkFall: (cb) ->
     moved = false
-    didOneMove = true
-    while didOneMove
-      didOneMove = false
+    try_again = true
+    while try_again
+      try_again = false
       for jelly in @jellies
-        if not @checkFilled([jelly], 0, 1)
-          @move([jelly], 0, 1)
-          didOneMove = true
+        jellyset = [jelly]
+        if not @checkFilled(jellyset, 0, 1)
+          @move(jellyset, 0, 1)
+          try_again = true
           moved = true
     if moved
       @waitForAnimation cb
