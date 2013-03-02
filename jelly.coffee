@@ -57,6 +57,23 @@ levels = [
     "x       r xxxx",
     "x   xxxxxxxxxx",
     "xxxxxxxxxxxxxx", ],
+
+  [ [ "xxxxxxxxxxxxxx",
+      "x            x",
+      "x          r x",
+      "x          x x",
+      "x     b   b  x",
+      "x     x  rr  x",
+      "x         x  x",
+      "x r  bx x x  x",
+      "x x  xx x x  x",
+      "xxxxxxxxxxxxxx", ],
+    [
+      { x:2, y:7, dir:'down' },
+      { x:5, y:7, dir:'down' },
+    ]                    
+  ],
+  
   ]
 
 CELL_SIZE = 48
@@ -68,7 +85,11 @@ moveToCell = (dom, x, y) ->
 class Stage
   constructor: (@dom, map) ->
     @jellies = []
-    @loadMap(map)
+    anchors = []
+    if map[0] instanceof Array
+      anchors = map[1]
+      map = map[0]
+    @loadMap(map, anchors)
 
     # Capture and swallow all click events during animations.
     @busy = false
@@ -80,7 +101,7 @@ class Stage
 
     @checkForMerges()
 
-  loadMap: (map) ->
+  loadMap: (map, anchors) ->
     table = document.createElement('table')
     @dom.appendChild(table)
     @cells = for y in [0...map.length]
@@ -108,7 +129,37 @@ class Stage
           @jellies.push jelly
         cell
     @addBorders()
+    @placeAnchors(anchors)
     return
+
+  placeAnchors: (anchors) ->
+    directions = {
+      'left':  [-1,  0, 'leftarrow', 'borderRightColor'],
+      'right': [ 1,  0, 'rightarrow', 'borderLeftColor'],
+      'up':    [ 0, -1, 'uparrow', 'borderBottomColor'],
+      'down':  [ 0,  1, 'downarrow', 'borderTopColor'],
+    }
+    colors = {
+      'red'  : 'hsl(0, 100%, 75%)'
+      'green': 'hsl(120, 100%, 45%)'
+      'blue' : 'hsl(216, 100%, 70%)'
+    }
+    for anchor in anchors
+      dx = directions[anchor.dir][0]
+      dy = directions[anchor.dir][1]
+      classname = directions[anchor.dir][2]
+      property = directions[anchor.dir][3]
+      
+      me = @cells[anchor.y][anchor.x]
+      other = @cells[anchor.y + dy][anchor.x + dx]
+      me.mergeWith(other, anchor.dir)
+
+      # Create the overlapping anchoring triangle.
+      arrow = document.createElement('div')
+      arrow.style[property] = colors[me.color]
+      arrow.className = classname
+      other.dom.appendChild(arrow)
+    @jellies = (jelly for jelly in @jellies when jelly.cells)
 
   addBorders: ->
     for y in [0...@cells.length]
@@ -230,10 +281,10 @@ class JellyCell
 
   mergeWith: (other, dir) ->
     borders = {
-      'left': ['borderLeft', 'borderRight'],
-      'right': ['borderRight', 'borderLeft'],
-      'up': ['borderTop', 'borderBottom'],
-      'down': ['borderBottom', 'borderTop']
+      'left':  ['borderLeft',   'borderRight'],
+      'right': ['borderRight',  'borderLeft'],
+      'up':    ['borderTop',    'borderBottom'],
+      'down':  ['borderBottom', 'borderTop']
     }
     # Remove internal borders, whether merging with other jelly or wall.
     @dom.style[borders[dir][0]] = 'none'

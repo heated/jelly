@@ -2,7 +2,21 @@
   var CELL_SIZE, Jelly, JellyCell, Stage, Wall, i, level, levelPicker, levels, moveToCell, option, stage, _ref,
     __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-  levels = [["xxxxxxxxxxxxxx", "x            x", "x            x", "x      r     x", "x      xx    x", "x  g     r b x", "xxbxxxg xxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x            x", "x     g   g  x", "x   r r   r  x", "xxxxx x x xxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x   bg  x g  x", "xxx xxxrxxx  x", "x      b     x", "xxx xxxrxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x       r    x", "x       b    x", "x       x    x", "x b r        x", "x b r      b x", "xxx x      xxx", "xxxxx xxxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "xrg  gg      x", "xxx xxxx xx  x", "xrg          x", "xxxxx  xx   xx", "xxxxxx xx  xxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "xxxxxxx      x", "xxxxxxx g    x", "x       xx   x", "x r   b      x", "x x xxx x g  x", "x         x bx", "x       r xxxx", "x   xxxxxxxxxx", "xxxxxxxxxxxxxx"]];
+  levels = [
+    ["xxxxxxxxxxxxxx", "x            x", "x            x", "x      r     x", "x      xx    x", "x  g     r b x", "xxbxxxg xxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x            x", "x     g   g  x", "x   r r   r  x", "xxxxx x x xxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "x   bg  x g  x", "xxx xxxrxxx  x", "x      b     x", "xxx xxxrxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x       r    x", "x       b    x", "x       x    x", "x b r        x", "x b r      b x", "xxx x      xxx", "xxxxx xxxxxxxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "x            x", "x            x", "xrg  gg      x", "xxx xxxx xx  x", "xrg          x", "xxxxx  xx   xx", "xxxxxx xx  xxx", "xxxxxxxxxxxxxx"], ["xxxxxxxxxxxxxx", "xxxxxxx      x", "xxxxxxx g    x", "x       xx   x", "x r   b      x", "x x xxx x g  x", "x         x bx", "x       r xxxx", "x   xxxxxxxxxx", "xxxxxxxxxxxxxx"], [
+      ["xxxxxxxxxxxxxx", "x            x", "x          r x", "x          x x", "x     b   b  x", "x     x  rr  x", "x         x  x", "x r  bx x x  x", "x x  xx x x  x", "xxxxxxxxxxxxxx"], [
+        {
+          x: 2,
+          y: 7,
+          dir: 'down'
+        }, {
+          x: 5,
+          y: 7,
+          dir: 'down'
+        }
+      ]
+    ]
+  ];
 
   CELL_SIZE = 48;
 
@@ -14,11 +28,16 @@
   Stage = (function() {
 
     function Stage(dom, map) {
-      var event, maybeSwallowEvent, _i, _len, _ref,
+      var anchors, event, maybeSwallowEvent, _i, _len, _ref,
         _this = this;
       this.dom = dom;
       this.jellies = [];
-      this.loadMap(map);
+      anchors = [];
+      if (map[0] instanceof Array) {
+        anchors = map[1];
+        map = map[0];
+      }
+      this.loadMap(map, anchors);
       this.busy = false;
       maybeSwallowEvent = function(e) {
         e.preventDefault();
@@ -32,7 +51,7 @@
       this.checkForMerges();
     }
 
-    Stage.prototype.loadMap = function(map) {
+    Stage.prototype.loadMap = function(map, anchors) {
       var cell, classname, color, jelly, row, table, td, tr, x, y;
       table = document.createElement('table');
       this.dom.appendChild(table);
@@ -81,6 +100,46 @@
         return _results;
       }).call(this);
       this.addBorders();
+      this.placeAnchors(anchors);
+    };
+
+    Stage.prototype.placeAnchors = function(anchors) {
+      var anchor, arrow, classname, colors, directions, dx, dy, jelly, me, other, property, _i, _len;
+      directions = {
+        'left': [-1, 0, 'leftarrow', 'borderRightColor'],
+        'right': [1, 0, 'rightarrow', 'borderLeftColor'],
+        'up': [0, -1, 'uparrow', 'borderBottomColor'],
+        'down': [0, 1, 'downarrow', 'borderTopColor']
+      };
+      colors = {
+        'red': 'hsl(0, 100%, 75%)',
+        'green': 'hsl(120, 100%, 45%)',
+        'blue': 'hsl(216, 100%, 70%)'
+      };
+      for (_i = 0, _len = anchors.length; _i < _len; _i++) {
+        anchor = anchors[_i];
+        dx = directions[anchor.dir][0];
+        dy = directions[anchor.dir][1];
+        classname = directions[anchor.dir][2];
+        property = directions[anchor.dir][3];
+        me = this.cells[anchor.y][anchor.x];
+        other = this.cells[anchor.y + dy][anchor.x + dx];
+        me.mergeWith(other, anchor.dir);
+        arrow = document.createElement('div');
+        arrow.style[property] = colors[me.color];
+        arrow.className = classname;
+        other.dom.appendChild(arrow);
+      }
+      return this.jellies = (function() {
+        var _j, _len2, _ref, _results;
+        _ref = this.jellies;
+        _results = [];
+        for (_j = 0, _len2 = _ref.length; _j < _len2; _j++) {
+          jelly = _ref[_j];
+          if (jelly.cells) _results.push(jelly);
+        }
+        return _results;
+      }).call(this);
     };
 
     Stage.prototype.addBorders = function() {
