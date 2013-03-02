@@ -83,6 +83,90 @@
           dir: 'down'
         }
       ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xr r r      rx", "xg x x      gx", "xb          bx", "xxxxx     xxxx", "xxxxxx   xxxxx", "xxxxxx   xxxxx", "xxxxxx   xxxxx", "xxxxxxgggxxxxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 1,
+          y: 3,
+          dir: 'down'
+        }, {
+          x: 6,
+          y: 8,
+          dir: 'left'
+        }, {
+          x: 8,
+          y: 8,
+          dir: 'right'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xx   0001233rx", "xx   0411233xx", "xx   444122xxx", "xx     xxxxxxx", "xr     xxxxxxx", "xx     xxxxxxx", "xx     xxxxxxx", "xx     xxxxxxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 1,
+          y: 5,
+          dir: 'up'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xxxx000xxxgb x", "xxxx0     bg x", "xxxx0    11xxx", "xxxx000xxxxxxx", "x 222  xxxxxxx", "xxxx     xxgxx", "xxxx   g    bx", "xxxx   x     x", "xxxxxxxxxxxxxx"], [
+        {
+          x: 11,
+          y: 6,
+          dir: 'up'
+        }, {
+          x: 12,
+          y: 7,
+          dir: 'up'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "x            x", "xb01         x", "xb0gg     g  x", "xb023     g4bx", "xxxxx g   xxxx", "xxxxx gg  xxxx", "xxxxx ggg xxxx", "xxxxx ggggxxxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 12,
+          y: 4,
+          dir: 'down'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xg0    g1gx  x", "x 3g    1 x  x", "x444    2 x  x", "xg g   ggg   x", "xxx     xxx  x", "xxx     xxx  x", "xxx     xxx  x", "xxx          x", "xxxxxxxxxxxxxx"], [
+        {
+          x: 1,
+          y: 1,
+          dir: 'right'
+        }, {
+          x: 3,
+          y: 2,
+          dir: 'left'
+        }, {
+          x: 1,
+          y: 4,
+          dir: 'up'
+        }, {
+          x: 3,
+          y: 4,
+          dir: 'up'
+        }, {
+          x: 8,
+          y: 4,
+          dir: 'up'
+        }, {
+          x: 7,
+          y: 1,
+          dir: 'right'
+        }, {
+          x: 9,
+          y: 1,
+          dir: 'left'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xrrrr   rggxxx", "xxxb    xxxxxx", "xxxx       xbx", "xx           x", "xx           x", "xx     x     x", "xx x         x", "xx        x  x", "xxxxxxxxxxxxxx"], [
+        {
+          x: 12,
+          y: 3,
+          dir: 'up'
+        }
+      ]
     ]
   ];
 
