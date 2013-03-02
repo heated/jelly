@@ -85,6 +85,8 @@
         anchors = map[1];
         map = map[0];
       }
+      this.num_monochromatic_blocks = 0;
+      this.num_colors = 0;
       this.loadMap(map, anchors);
       this.busy = false;
       maybeSwallowEvent = function(e) {
@@ -100,9 +102,10 @@
     }
 
     Stage.prototype.loadMap = function(map, anchors) {
-      var cell, classname, color, jelly, row, table, td, tr, x, y;
+      var cell, classname, color, colors, jelly, row, table, td, tr, x, y;
       table = document.createElement('table');
       this.dom.appendChild(table);
+      colors = {};
       this.cells = (function() {
         var _ref, _results;
         _results = [];
@@ -151,6 +154,9 @@
                 jelly = new Jelly(this, cell, x, y);
                 this.dom.appendChild(jelly.dom);
                 this.jellies.push(jelly);
+                this.num_monochromatic_blocks += 1;
+                if (!(color in colors)) this.num_colors += 1;
+                colors[color] = 1;
               }
               _results2.push(cell);
             }
@@ -159,6 +165,7 @@
         }
         return _results;
       }).call(this);
+      console.log('spaces colors ', this.num_monochromatic_blocks, this.num_colors);
       this.addBorders();
       this.placeAnchors(anchors);
     };
@@ -337,20 +344,10 @@
     };
 
     Stage.prototype.checkForCompletion = function() {
-      var cell, colors, jelly, x, y, _i, _j, _len, _len2, _ref, _ref2, _ref3;
-      colors = {};
-      _ref = this.jellies;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        jelly = _ref[_i];
-        _ref2 = jelly.cellCoords();
-        for (_j = 0, _len2 = _ref2.length; _j < _len2; _j++) {
-          _ref3 = _ref2[_j], x = _ref3[0], y = _ref3[1], cell = _ref3[2];
-          colors[cell.color] = 1;
-        }
-      }
-      if (Object.keys(colors).length === this.jellies.length) {
+      if (this.num_monochromatic_blocks <= this.num_colors) {
         alert("Congratulations! Level completed.");
       }
+      console.log('spaces colors ', this.num_monochromatic_blocks, this.num_colors);
     };
 
     Stage.prototype.doOneMerge = function() {
@@ -375,6 +372,7 @@
             }
             cell.mergeWith(other, dir);
             cell['merged' + dir] = true;
+            this.num_monochromatic_blocks -= 1;
             return true;
           }
         }

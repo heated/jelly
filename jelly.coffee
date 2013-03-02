@@ -156,6 +156,8 @@ class Stage
     if map[0] instanceof Array
       anchors = map[1]
       map = map[0]
+    @num_monochromatic_blocks = 0
+    @num_colors = 0
     @loadMap(map, anchors)
 
     # Capture and swallow all click events during animations.
@@ -171,6 +173,7 @@ class Stage
   loadMap: (map, anchors) ->
     table = document.createElement('table')
     @dom.appendChild(table)
+    colors = {}
     @cells = for y in [0...map.length]
       row = map[y].split(//)
       tr = document.createElement('tr')
@@ -196,6 +199,9 @@ class Stage
           jelly = new Jelly(this, cell, x, y)
           @dom.appendChild(jelly.dom)
           @jellies.push jelly
+          @num_monochromatic_blocks += 1;
+          @num_colors +=1 unless color of colors
+          colors[color] = 1
         cell
     @addBorders()
     @placeAnchors(anchors)
@@ -317,9 +323,7 @@ class Stage
     return
 
   checkForCompletion: ->
-    colors = {}
-    colors[cell.color] = 1 for [x,y,cell] in jelly.cellCoords() for jelly in @jellies
-    if Object.keys(colors).length == @jellies.length
+    if @num_monochromatic_blocks <= @num_colors
       alert("Congratulations! Level completed.")
     return
 
@@ -337,6 +341,7 @@ class Stage
             @jellies = @jellies.filter (j) -> j != other.jelly
           cell.mergeWith other, dir
           cell['merged' + dir] = true
+          @num_monochromatic_blocks -= 1
           return true
     return false
 
