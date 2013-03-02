@@ -331,10 +331,12 @@ class Stage
         for [dx, dy, dir] in [[1, 0, 'right'], [0, 1, 'down']]
           other = @cells[y + dy][x + dx]
           continue unless other and other instanceof JellyCell
-          continue unless other.jelly != jelly
+          continue if cell['merged' + dir]
           continue unless other.color == cell.color
-          @jellies = @jellies.filter (j) -> j != other.jelly
+          if jelly != other.jelly
+            @jellies = @jellies.filter (j) -> j != other.jelly
           cell.mergeWith other, dir
+          cell['merged' + dir] = true
           return true
     return false
 
@@ -363,7 +365,7 @@ class JellyCell
     @jelly.immovable = true if other instanceof Wall
 
     # If merging with jelly, unify the jellies.
-    if other instanceof JellyCell
+    if other instanceof JellyCell and @jelly != other.jelly
       @jelly.merge(other.jelly)
 
 

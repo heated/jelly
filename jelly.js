@@ -366,12 +366,15 @@
             _ref5 = _ref4[_k], dx = _ref5[0], dy = _ref5[1], dir = _ref5[2];
             other = this.cells[y + dy][x + dx];
             if (!(other && other instanceof JellyCell)) continue;
-            if (other.jelly === jelly) continue;
+            if (cell['merged' + dir]) continue;
             if (other.color !== cell.color) continue;
-            this.jellies = this.jellies.filter(function(j) {
-              return j !== other.jelly;
-            });
+            if (jelly !== other.jelly) {
+              this.jellies = this.jellies.filter(function(j) {
+                return j !== other.jelly;
+              });
+            }
             cell.mergeWith(other, dir);
+            cell['merged' + dir] = true;
             return true;
           }
         }
@@ -414,7 +417,9 @@
       this.dom.style[borders[dir][0]] = 'none';
       other.dom.style[borders[dir][1]] = 'none';
       if (other instanceof Wall) this.jelly.immovable = true;
-      if (other instanceof JellyCell) return this.jelly.merge(other.jelly);
+      if (other instanceof JellyCell && this.jelly !== other.jelly) {
+        return this.jelly.merge(other.jelly);
+      }
     };
 
     return JellyCell;
