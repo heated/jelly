@@ -15,6 +15,18 @@
           dir: 'down'
         }
       ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xxxx x  x xxxx", "xxx  g  b  xxx", "xx   x  x   xx", "xx   b  g   xx", "xxg        bxx", "xxxg      bxxx", "xxxx      xxxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 5,
+          y: 4,
+          dir: 'up'
+        }, {
+          x: 8,
+          y: 4,
+          dir: 'up'
+        }
+      ]
     ]
   ];
 
