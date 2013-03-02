@@ -27,6 +27,42 @@
           dir: 'up'
         }
       ]
+    ], [
+      ["xxxxxxxxxxxxxx", "x            x", "x            x", "x          rbx", "x    x     xxx", "xb        00xx", "xx  rx  x xxxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 4,
+          y: 6,
+          dir: 'down'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "x   gr       x", "x   00 1     x", "x    x x xxxxx", "x            x", "x  x  x      x", "x        x  rx", "xx   x     gxx", "x          xxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 11,
+          y: 7,
+          dir: 'down'
+        }, {
+          x: 12,
+          y: 6,
+          dir: 'down'
+        }
+      ]
+    ], [
+      ["xxxxxxxxxxxxxx", "x      g00g gx", "x       xxx xx", "x           gx", "x11         xx", "xxx          x", "x       g    x", "x   x xxx   gx", "x   xxxxxx xxx", "xxxxxxxxxxxxxx"], [
+        {
+          x: 12,
+          y: 7,
+          dir: 'down'
+        }, {
+          x: 7,
+          y: 1,
+          dir: 'right'
+        }, {
+          x: 10,
+          y: 1,
+          dir: 'left'
+        }
+      ]
     ]
   ];
 
@@ -95,6 +131,18 @@
                   break;
                 case 'b':
                   color = 'blue';
+                  break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                  color = 'black' + row[x];
               }
               td.className = classname;
               tr.appendChild(td);

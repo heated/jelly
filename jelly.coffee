@@ -58,6 +58,12 @@ levels = [
     "x   xxxxxxxxxx",
     "xxxxxxxxxxxxxx", ],
 
+  # Anchored jellies are specified separately after the
+  # level map. Instead of [row, row, row...in the presence of
+  # anchors the level specification is: 
+  # [ [row,row,row...], [ anchor, anchor, anchor...] ].
+  # Each anchor starts from a colored non-black jelly's
+  # coordinates and specifies the direction in which it's "held".
   [ [ "xxxxxxxxxxxxxx",
       "x            x",
       "x          r x",
@@ -88,7 +94,53 @@ levels = [
       { x:8, y:4, dir:'up' },
     ]
   ],
-  
+
+  [ [ "xxxxxxxxxxxxxx",
+      "x            x",
+      "x            x",
+      "x          rbx",
+      "x    x     xxx",
+      "xb        00xx",
+      "xx  rx  x xxxx",
+      "xxxxxxxxxxxxxx", ],
+    [
+      { x:4, y:6, dir:'down' },
+    ],
+  ],
+
+  [ [ "xxxxxxxxxxxxxx",
+      "x   gr       x",
+      "x   00 1     x",
+      "x    x x xxxxx",
+      "x            x",
+      "x  x  x      x",
+      "x        x  rx",
+      "xx   x     gxx",
+      "x          xxx",
+      "xxxxxxxxxxxxxx", ],
+    [
+      { x:11, y:7, dir:'down' },
+      { x:12, y:6, dir:'down' },
+    ],
+  ],
+
+  [ [ "xxxxxxxxxxxxxx",
+      "x      g00g gx",
+      "x       xxx xx",
+      "x           gx",
+      "x11         xx",
+      "xxx          x",
+      "x       g    x",
+      "x   x xxx   gx",
+      "x   xxxxxx xxx",
+      "xxxxxxxxxxxxxx", ],
+    [
+      { x:12, y:7, dir:'down' },
+      { x:7, y:1, dir:'right' },
+      { x:10, y:1, dir:'left' },
+    ],
+  ],
+
   ]
 
 CELL_SIZE = 48
@@ -135,6 +187,8 @@ class Stage
           when 'r' then color = 'red'
           when 'g' then color = 'green'
           when 'b' then color = 'blue'
+          when '0','1','2','3','4','5','6','7','8','9'
+            color = 'black' + row[x]
         td.className = classname
         tr.appendChild(td)
         if color
