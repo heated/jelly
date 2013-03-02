@@ -63,7 +63,15 @@
           dir: 'left'
         }
       ]
-    ]
+    ], [
+      ["xxxxxxxxxxxxxx", "xxr rr  rr rxx", "xxx  x  x  xxx", "x            x", "xb          bx", "xx          xx", "x            x", "x            x", "x   xxxxxx   x", "xxxxxxxxxxxxxx"], [
+        {
+          x: 12,
+          y: 4,
+          dir: 'down'
+        }
+      ]
+    ], ["xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx", "xxxxx gr xxxxx", "xxxxx rb xxxxx", "xxxxx gr xxxxx", "xxxxx bg xxxxx", "xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx"]
   ];
 
   CELL_SIZE = 48;
@@ -165,7 +173,6 @@
         }
         return _results;
       }).call(this);
-      console.log('spaces colors ', this.num_monochromatic_blocks, this.num_colors);
       this.addBorders();
       this.placeAnchors(anchors);
     };
@@ -347,7 +354,6 @@
       if (this.num_monochromatic_blocks <= this.num_colors) {
         alert("Congratulations! Level completed.");
       }
-      console.log('spaces colors ', this.num_monochromatic_blocks, this.num_colors);
     };
 
     Stage.prototype.doOneMerge = function() {
