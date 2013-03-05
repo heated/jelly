@@ -484,6 +484,7 @@ class Stage
           continue unless other.color == cell.color
           if jelly != other.jelly
             @jellies = @jellies.filter (j) -> j != other.jelly
+          if cell.color_master != other.color_master
             @num_monochromatic_blocks -= 1
           cell.mergeWith other, dir
           cell['merged' + dir] = true
@@ -499,6 +500,8 @@ class JellyCell
     @dom.className = 'cell jelly ' + color
     @x = 0
     @y = 0
+    @color_master = this
+    @color_mates = [this]
 
   mergeWith: (other, dir) ->
     borders = {
@@ -514,7 +517,13 @@ class JellyCell
     # If merging with wall, jelly becomes immovable.
     @jelly.immovable = true if other instanceof Wall
 
-    # If merging with jelly, unify the jellies.
+    # If merging with jelly, unify the jellies and color mates' lists.
+    if other instanceof JellyCell and @color == other.color and @color_master != other.color_master
+      other_master = other.color_master
+      for cell in other_master.color_mates
+        cell.color_master = @color_master
+      @color_master.color_mates =
+        @color_master.color_mates.concat(other_master.color_mates)  
     if other instanceof JellyCell and @jelly != other.jelly
       @jelly.merge(other.jelly)
 

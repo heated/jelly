@@ -472,6 +472,8 @@
               this.jellies = this.jellies.filter(function(j) {
                 return j !== other.jelly;
               });
+            }
+            if (cell.color_master !== other.color_master) {
               this.num_monochromatic_blocks -= 1;
             }
             cell.mergeWith(other, dir);
@@ -505,10 +507,12 @@
       this.dom.className = 'cell jelly ' + color;
       this.x = 0;
       this.y = 0;
+      this.color_master = this;
+      this.color_mates = [this];
     }
 
     JellyCell.prototype.mergeWith = function(other, dir) {
-      var borders;
+      var borders, cell, other_master, _i, _len, _ref;
       borders = {
         'left': ['borderLeft', 'borderRight'],
         'right': ['borderRight', 'borderLeft'],
@@ -518,6 +522,15 @@
       this.dom.style[borders[dir][0]] = 'none';
       other.dom.style[borders[dir][1]] = 'none';
       if (other instanceof Wall) this.jelly.immovable = true;
+      if (other instanceof JellyCell && this.color === other.color && this.color_master !== other.color_master) {
+        other_master = other.color_master;
+        _ref = other_master.color_mates;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          cell = _ref[_i];
+          cell.color_master = this.color_master;
+        }
+        this.color_master.color_mates = this.color_master.color_mates.concat(other_master.color_mates);
+      }
       if (other instanceof JellyCell && this.jelly !== other.jelly) {
         return this.jelly.merge(other.jelly);
       }
