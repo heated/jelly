@@ -574,7 +574,7 @@ levelPicker = document.getElementById('level')
 for i in [1..levels.length]
   option = document.createElement('option')
   option.value = i
-  option.innerText = "Level #{i}"
+  option.appendChild(document.createTextNode("Level #{i}"));
   levelPicker.appendChild(option)
 levelPicker.value = level
 levelPicker.addEventListener 'change', () ->

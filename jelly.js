@@ -610,7 +610,7 @@
   for (i = 1, _ref = levels.length; 1 <= _ref ? i <= _ref : i >= _ref; 1 <= _ref ? i++ : i--) {
     option = document.createElement('option');
     option.value = i;
-    option.innerText = "Level " + i;
+    option.appendChild(document.createTextNode("Level " + i));
     levelPicker.appendChild(option);
   }
 
