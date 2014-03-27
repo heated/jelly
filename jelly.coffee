@@ -743,6 +743,7 @@ class Stage
     @loadMap(map)
     @placeAnchors(anchors, growers) if anchors
     @placeGrowers(growers) if growers
+    @current_cell = null
 
     # Capture and swallow all click events during animations.
     @busy = false
@@ -751,6 +752,11 @@ class Stage
       e.stopPropagation() if @busy
     for event in ['contextmenu', 'click', 'touchstart', 'touchmove']
       @dom.addEventListener(event, maybeSwallowEvent, true)
+    document.addEventListener 'keydown', (e) =>
+      return if @busy
+      switch e.keyCode
+        when 37 then @trySlide(@current_cell, -1)
+        when 39 then @trySlide(@current_cell, 1)
 
     @checkForMerges()
 
@@ -911,6 +917,7 @@ class Stage
     return
 
   trySlide: (jelly, dir) ->
+    return unless jelly
     jellies = [jelly]
     return if @checkFilled(jellies, dir, 0)
     @busy = true
@@ -1201,8 +1208,10 @@ class Jelly
     @dom.addEventListener 'touchmove', (e) =>
       dx = e.touches[0].pageX - @start
       if Math.abs(dx) > 10
-        dx = Math.max(Math.min(dx, 1), -1)
-        stage.trySlide(this, dx)
+        dir = dx > 0 ? 1 : -1
+        stage.trySlide(this, dir)
+    @dom.addEventListener 'mouseover', (e) =>
+      stage.current_cell = this
     @immovable = false
 
   cellCoords: ->
