@@ -1082,9 +1082,9 @@ class Stage
     @history.push [map, anchors, growers]
     
     # The original game limits undo to last 3 moves, so replicate that
-    if @history.length > 3
-      [abc...,x,y,z] = @history
-      @history = [x,y,z]
+    # if @history.length > 3
+    #   [abc...,x,y,z] = @history
+    #   @history = [x,y,z]
     return
       
 
