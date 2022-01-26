@@ -2,7 +2,7 @@
 
 Now with keyboard support!
 
-Play here: http://heated.github.com/jelly/
+Play here: http://heated.github.io/jelly/
 
 Features:
  - [x] all 40 glorious original levels
